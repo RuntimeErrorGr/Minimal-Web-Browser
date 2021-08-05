@@ -1,6 +1,6 @@
 //Lăbău Cristea Andrei Liviu 314 CB
 
-	Proiectul este impartita in 5 fisiere sursa si un fisier header: 
+	Proiectul este impartit in 5 fisiere sursa si un fisier header: 
 - FunctiiStiva.c -> functiile de implementare si manipulare a stivelor
 - FunctiiCoada.c -> functiile de implementare si manipulare a cozilor
 - FunctiiLista.c -> functiile de implementare si manipulare a listelor
