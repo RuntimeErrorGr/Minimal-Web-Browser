@@ -1,0 +1,132 @@
+//Lăbău Cristea Andrei Liviu 314 CB
+
+	Proiectul este impartita in 5 fisiere sursa si un fisier header: 
+- FunctiiStiva.c -> functiile de implementare si manipulare a stivelor
+- FunctiiCoada.c -> functiile de implementare si manipulare a cozilor
+- FunctiiLista.c -> functiile de implementare si manipulare a listelor
+- utils.c -> functiile de implementare a functionalitatilor browserului
+- main.c -> citirea din fisierele de input, apelul functiilor din utils.c si
+afisarea rezultatelor in fisierele de output
+- utils.h -> implementarea structurilor si macrodefinitii
+
+	Pentru a simula functionarea browserului web am folosit o structura TBrowser
+ce contine urmatoarele campuri: 
+- tabs -> lista de taburi deschide in browser
+- current_tab -> pointer catre tabul curent
+- historyQ -> coada istoricului global
+- priorDownQ -> coada cu prioritati a descarcarilor
+- finishDownQ -> coada descarcarilor finalizate
+- bandwidth -> latimea de banda cu care se efectueaza descarcarile. Poate fi 
+modificata  de la valoarea default cu ajutorul comenzii set_bandwidth
+- time -> numarul de secunde ce este lasat sa treaca la un moment dat pentru a
+lasa descarcarile sa avanseze. Este setat cu ajutorul comenzii wait. 
+Obiectul de tip TBrowser este unic in program.
+
+	Descrierea operatiilor: 
+1) Setare bandwith: valoarea campului bandwith din structura TBrowser este
+actualizata cu argumentul dat la input.
+2) Deschidere tab: se aloca memorie pentru un nou obiect de tip tab, se
+initializeaza campurile acestuia, apoi se insereaza noul tab creat in lista 
+de taburi a browserului. De asemenea se modifica pointerul current_tab din 
+structura TBrowser astfel incat sa pointeze la tabul nou creat.
+3) Inchidere tab: utlima celula din lista de taburi este stearsa si in cazul 
+in care tabul curent este cel care se inchide, pointerul current_tab va fi 
+setat la penultima celula din lista.
+4) Schimbare tab: lista de taburi este parcursa intr-o bucla while de la inceput
+pana la pozitia indicata de index. Odata ce se ajunge la indexul respectiv, 
+pointerul current_tab este schimbat la celula corespunzatoare.
+5) Afisarea taburilor deschise: lista de taburi este parcursa si pentru fiecare 
+element in parte este apelata o functie ce afiseaza url-ul paginii curente 
+deschide intr-un tab daca exista o pagina deschisa sau "empty" in cazul in care 
+nu exista nicio pagina deschisa. Parcurgerea listei se realizeaza in cadrul unei
+functii ce primeste ca parametru un pointer la o functie de afisare (in cazul 
+acesta o functie de afisare pentru un obiect de tip tab).
+6) Accesare pagina: in momentul in care se executa comanda goto, argumentul 
+comenzii este introdus in coada istoricului global, acesta reprezentand url-ul
+noii pagini accesate. Apoi este alocat un obiect de tip pagina si pointerul 
+current_page din structura Tab (tabul curent) este modificat sa pointeze catre 
+pagina nou alocata. De asemenea, stiva de forward din cadrul structurii Tab 
+este resetata cu ajutorul unei functii de reset.
+7) Accesarea paginii anterioare: Scoate din varful stivei de back 
+(daca stiva de back nu este vida) a tabului curent, cu ajutorul unei operatii 
+de Pop, un obiect de tip pagian web care este setata ca fiind current_page
+in tab. Daca nu exista pagini in stiva de back se afiseaza un mesaj de eroare.
+8) Accesarea paginii urmatoare: Scoate din varful stivei de forward (daca stiva
+de forward nu este diva) a tabului curent, cu ajutorul unei opreatii de Pop, un
+obiect de tip pagina web care este setata ca fiind current_page in tab. Daca nu
+exista pagini in stiva de forward se afiseaza un mesaj de eroare.
+9) Afisarea istoricului global: este folosita o functie care afiseaza coada 
+istoricului global. Cat timp exista elemente in coada istoricului global, este 
+extras cate unul pe rand, este apelata o functie de afisare a unui string 
+(functie data ca parametru functiei in cadrul careia se efectueaza operatiile
+succesive de extragere) ce primeste ca parametru elementul extras. Dupa ce a fost
+afisat, elementul este introdus intr-o coada auxiliara. Cand a fost finalizata 
+afisarea tuturor elementelor din coada istoricului global, aceasta este vida, si
+toate elementele din ea se afla acum in coada auxiliara. Pentru a reconstrui 
+coada istoricului global se extrage pe rand cate un element din coada auxiliara 
+si se introduce in coada istoricului global.
+10) Stergere intrari din istoricul global: in cazul in care argumentul comenzii
+de clear_history este 0, este resetata intreaga coada a instoricului global.
+Daca argumentul este altul decat 0, se foloseste o bucla while in cadrul careia 
+se extrag elemente din coada pana ce un contor k devine exact cu nr_entries
+primit ca argument al comenzii.
+11) Afisare descarcari din pagina curenta: in cazul in care se doreste afisarea
+tuturor descarcarilor posibile de pe o pagina se foloseste o functie ce primeste
+ca parametru un obiect de tip pagina ce reprezinta pagina curenta de pe care 
+urmeaza sa se efectueze descarcarile. In functie de nr. de resurse disponibile 
+pe pagina, vectorul de resurse este parcurs in cadrul unei bucle for si sunt 
+afisate pe rand informatiile corespunzatoare.
+12) Descarcare resursa din pagina curenta: descarcarea unei resurse presupune
+in primul rand realizarea unei copii a elementului corespunzator indexului 
+din vectorul de resurse al paginii curente. Daca coada prioritatilor de 
+descarcare este goala, resursa se introduce in varful cozii. In cazul in care
+coada prioritatilor nu este goala introducerea se realizeaza pe baza prioritatii
+resursei. Prioritatea este data de diferenta resursa -> dimension - resursa ->
+currently_downloaded. Ne folosim de asemea de o coada auxiliara.
+In cadrul unei bucle while sunt extrase pe rand elementele deja existente in 
+coada prioritatilor de descarcare si se calculeaza prioritatea. Daca prioritatea
+este mai mica decat cea a resursei ce trebuie introdusa, in coada auxiliara 
+este introdusa resursa deja existenta. Altfel, se verifica daca in coada 
+auxiliara exista deja noua resursa de descarcat. Daca nu, atunci este introdusa 
+noua resursa si apoi resursa deja existenta. Exista si un caz special in care au
+fost analizate prioritatile tuturor resurselor existente, dar niciuna nu este 
+mai mare decat prioritatea noii resurse. In acest caz, noua resursa este 
+introdusa la finalul cozii.
+Dupa ce coada auxiliara a fost construita cu succes, continand acum si noua 
+resursa, coada initiala este refacuta in cadrul unei bucle while cu ajutorul 
+unei succesiuni de operatii de extragere si introducere.
+13) Afisarea descarcarilor: pentru a afisa descarcarile si statusul lor am folosit
+2 functii separate: una in cadrul careia cu ajutorul opreratiilor succesive 
+de extragere si introducere in coada si cu ajutorul unei cozi auxiliare afisez
+toate elementele caracteristice resurselor in formatul dorit si cealalta in care 
+afisez coada descarcarilor finalizate (in cazul in care exista descarcari 
+finalizate). 
+14) Avansarea descarcarilor: Exista 2 cazuri in care descarcarile din coada de 
+prioritati pot avansa: in urma unei comenzi goto sau in urma comenzii wait.
+Primul caz, cel al comenzii goto este cel mai usor deoarece singura operatie 
+necesara este modificarea campului currently_downloaded al resursei din varful
+cozii: resursa -> currently_downloaded += bandwidth. Dupa fiecare operatie de 
+genul asta se verifica daca in urma adunarii resursa -> currently_downloaded 
+este egal cu resursa -> dimension. Daca da, se scoate resursa din coada si se 
+baga in lista de descarcari finalizate. Daca nu, nu se intampla nimic altceva.
+In cazul comenzii wait avem 3 cazuri distincte: 
+a) incarcatura (load) disponibila pentru descarcare (time * bandwidth)
+este mai mica decat prioritatea resursei din varful cozii (resursa -> dimension 
+- resursa -> currently_downloaded). Astfel toata incarcatura se aduna la resursa
+in cauza, dar nu este suficient pentru a declara resursa complet descarcata.
+Incarcatura devine astfel 0.
+b) incarcatura (load) disponibila pentru descarcare (time * bandwidth) este 
+egala cu prioritatea resursei din varful cozii. Incarcatura este suficienta 
+pentru a downloada complet resursa. Aceasta este mutata in coada descarcarilor 
+finalizate.
+c) incarcatura (load) disponibila pentru descarcare (time * bandwidth) este 
+mai mare decat cantitatea ramasa de descarcat din resursa din varf. Astfel 
+este adaugata la resursa -> currently_downloaded necesarul pana la saturatie, 
+incarcatura este actualizata, resursa este mutata in coada descarcarilor 
+finalizate si se analizeaza urmatoarea resursa din coada. Aceasta se poate afla
+din noua intr-unul din cazurile a) b) sau c). Iesirea din bucla se face atunci 
+cand nu mai avem resurse in coada de prioritati de descarcare.
+
+ Total: [85/85]
+ Bonus: [00/20]
+
