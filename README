@@ -127,6 +127,4 @@ finalizate si se analizeaza urmatoarea resursa din coada. Aceasta se poate afla
 din noua intr-unul din cazurile a) b) sau c). Iesirea din bucla se face atunci 
 cand nu mai avem resurse in coada de prioritati de descarcare.
 
- Total: [85/85]
- Bonus: [00/20]
 
